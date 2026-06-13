@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مركز الاندلس للتدريب</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--primary:#1a6eb5;--primary-dark:#0d4f87;--secondary:#17a2b8;--success:#28a745;--danger:#dc3545;--warning:#ffc107;--dark:#1a2332;--light:#f4f7fb;--border:#dde3ee;--text:#2d3748;--muted:#718096;--white:#fff;--shadow:0 2px 12px rgba(0,0,0,0.08);--radius:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--light);color:var(--text);direction:rtl}
+#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a2332 0%,#1a6eb5 100%)}
+.login-box{background:white;border-radius:20px;padding:50px 40px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center}
+.login-box h1{color:var(--primary);font-size:1.6rem;margin-bottom:8px}
+.login-box p{color:var(--muted);margin-bottom:30px;font-size:.9rem}
+.login-box input{width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-size:1rem;margin-bottom:14px;text-align:right;font-family:inherit;transition:border-color .2s}
+.login-box input:focus{outline:none;border-color:var(--primary)}
+.login-box button{width:100%;padding:14px;background:var(--primary);color:white;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s}
+.login-box button:hover{background:var(--primary-dark)}
+#loginError{color:var(--danger);font-size:.85rem;margin-top:10px;display:none}
+#mainApp{display:none}
+.sidebar{width:240px;background:var(--dark);position:fixed;top:0;right:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+.sidebar-logo{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.1);text-align:center}
+.sidebar-logo h2{color:white;font-size:1rem;line-height:1.5}
+.sidebar-logo span{color:#64b5f6;font-size:.8rem}
+.sidebar nav{padding:16px 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:12px 20px;color:rgba(255,255,255,.7);cursor:pointer;transition:all .2s;border-right:3px solid transparent;font-size:.9rem}
+.nav-item:hover{background:rgba(255,255,255,.07);color:white}
+.nav-item.active{background:rgba(26,110,181,.3);color:#64b5f6;border-right-color:#64b5f6}
+.nav-item .icon{font-size:1.1rem;width:20px;text-align:center}
+.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1)}
+#userInfo{color:rgba(255,255,255,.7);font-size:.8rem;margin-bottom:10px}
+#logoutBtn{width:100%;padding:8px;background:rgba(220,53,69,.2);color:#ff6b6b;border:1px solid rgba(220,53,69,.3);border-radius:8px;cursor:pointer;font-family:inherit;font-size:.85rem;transition:all .2s}
+#logoutBtn:hover{background:rgba(220,53,69,.4)}
+.content{margin-right:240px;padding:24px;min-height:100vh}
+.page{display:none}.page.active{display:block}
+.page-header{margin-bottom:24px}
+.page-header h1{font-size:1.5rem;color:var(--dark)}
+.page-header p{color:var(--muted);font-size:.9rem;margin-top:4px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:white;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px}
+.stat-icon{width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.stat-info h3{font-size:1.8rem;font-weight:700}
+.stat-info p{color:var(--muted);font-size:.8rem}
+.card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.card-header h3{font-size:1rem;color:var(--dark)}
+.card-body{padding:20px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.875rem}
+th{background:var(--light);padding:10px 12px;text-align:right;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--light)}
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-size:.85rem;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn-primary{background:var(--primary);color:white}.btn-primary:hover{background:var(--primary-dark)}
+.btn-success{background:var(--success);color:white}.btn-success:hover{background:#1e7e34}
+.btn-danger{background:var(--danger);color:white}.btn-danger:hover{background:#bd2130}
+.btn-warning{background:var(--warning);color:var(--dark)}
+.btn-secondary{background:var(--muted);color:white}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{background:var(--light)}
+.btn-info{background:var(--secondary);color:white}
+.btn-sm{padding:5px 10px;font-size:.78rem}
+.btn-xs{padding:3px 8px;font-size:.75rem}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:.85rem;font-weight:600;color:var(--text)}
+.form-group input,.form-group select,.form-group textarea{padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:.9rem;font-family:inherit;transition:border-color .2s;background:white}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary)}
+.form-group textarea{resize:vertical;min-height:80px}
+.badge{padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600;white-space:nowrap}
+.badge-success{background:#d4edda;color:#155724}
+.badge-danger{background:#f8d7da;color:#721c24}
+.badge-warning{background:#fff3cd;color:#856404}
+.badge-info{background:#d1ecf1;color:#0c5460}
+.badge-primary{background:#cce5ff;color:#004085}
+.badge-secondary{background:#e2e3e5;color:#383d41}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:white;border-radius:16px;width:100%;max-width:720px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-lg{max-width:900px}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:white;z-index:1}
+.modal-header h3{font-size:1.1rem;color:var(--dark)}
+.modal-body{padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.close-btn{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);line-height:1}
+.search-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.search-bar input,.search-bar select{padding:9px 14px;border:2px solid var(--border);border-radius:8px;font-size:.875rem;font-family:inherit;background:white}
+.search-bar input:focus,.search-bar select:focus{outline:none;border-color:var(--primary)}
+.search-bar input{flex:1;min-width:200px}
+.profile-header{background:linear-gradient(135deg,var(--dark) 0%,var(--primary) 100%);border-radius:var(--radius);padding:30px;color:white;margin-bottom:20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.profile-photo{width:100px;height:100px;border-radius:50%;border:3px solid rgba(255,255,255,.4);object-fit:cover;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:2.5rem;flex-shrink:0;overflow:hidden}
+.profile-photo img{width:100%;height:100%;object-fit:cover}
+.profile-info h2{font-size:1.4rem;margin-bottom:6px}
+.profile-info p{opacity:.8;font-size:.9rem;margin-bottom:4px}
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:white;padding:6px;border-radius:12px;box-shadow:var(--shadow);flex-wrap:wrap}
+.tab-btn{flex:1;min-width:80px;padding:10px;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.8rem;font-weight:600;color:var(--muted);background:transparent;transition:all .2s}
+.tab-btn.active{background:var(--primary);color:white}
+.tab-content{display:none}.tab-content.active{display:block}
+.grades-table input[type=number]{width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;text-align:center}
+.grade-pass{color:var(--success);font-weight:700}
+.grade-fail{color:var(--danger);font-weight:700}
+.total-row td{background:var(--light);font-weight:700}
+.procedure-item{background:var(--light);border-radius:10px;padding:14px;margin-bottom:10px;border-right:4px solid var(--primary)}
+.procedure-item.تأخر-مصاريف{border-right-color:var(--warning)}
+.procedure-item.استدعاء{border-right-color:var(--secondary)}
+.procedure-item.فصل{border-right-color:var(--danger)}
+.procedure-item.إنذار{border-right-color:#fd7e14}
+.procedure-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px}
+.procedure-date{font-size:.78rem;color:var(--muted)}
+.file-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.file-item{background:var(--light);border-radius:10px;padding:14px;text-align:center;border:2px solid var(--border);cursor:pointer;transition:all .2s;position:relative}
+.file-item:hover{border-color:var(--primary);background:#e8f0fb}
+.file-icon{font-size:2rem;margin-bottom:8px}
+.file-name{font-size:.75rem;color:var(--text);word-break:break-all}
+.file-del{position:absolute;top:5px;left:5px;background:var(--danger);color:white;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:.7rem;display:none}
+.file-item:hover .file-del{display:block}
+.attendance-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.attendance-card{background:var(--light);border-radius:10px;padding:12px;border:2px solid var(--border)}
+.attendance-card .student-name{font-weight:600;font-size:.875rem;margin-bottom:8px}
+.att-buttons{display:flex;gap:6px}
+.att-btn{flex:1;padding:6px;border:2px solid var(--border);border-radius:6px;cursor:pointer;font-size:.8rem;font-weight:600;background:white;transition:all .2s}
+.att-btn.حاضر.active{background:var(--success);border-color:var(--success);color:white}
+.att-btn.غائب.active{background:var(--danger);border-color:var(--danger);color:white}
+.att-btn.متأخر.active{background:var(--warning);border-color:var(--warning)}
+.log-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.log-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.log-text{flex:1}
+.log-text strong{font-size:.875rem}
+.log-text p{font-size:.8rem;color:var(--muted);margin-top:2px}
+.photo-upload-area{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s}
+.photo-upload-area:hover{border-color:var(--primary);background:#f0f7ff}
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty-state .icon{font-size:3rem;margin-bottom:16px}
+/* PAYMENT */
+.payment-row{display:grid;grid-template-columns:180px 100px 120px 100px 100px 120px auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.payment-row.paid{background:#f0fff4}
+.payment-row.overdue{background:#fff5f5}
+.payment-row.pending-warn{background:#fffbf0}
+.pay-check{width:18px;height:18px;cursor:pointer}
+.penalty-badge{background:#f8d7da;color:#721c24;padding:2px 8px;border-radius:10px;font-size:.75rem}
+/* PRINT */
+@media print{
+  .sidebar,.no-print{display:none!important}
+  .content{margin-right:0!important;padding:10px!important}
+  .card{box-shadow:none;border:1px solid #ddd}
+}
+.hidden{display:none!important}
+.flex{display:flex}.gap-2{gap:8px}.gap-3{gap:12px}.items-center{align-items:center}.justify-between{justify-content:space-between}.flex-wrap{flex-wrap:wrap}
+.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mb-3{margin-bottom:12px}.text-center{text-align:center}.w-full{width:100%}
+.divider{height:1px;background:var(--border);margin:16px 0}
+</style>
+</head>
+<body>
+
+<div id="loginPage">
+  <div class="login-box">
+    <div style="font-size:3rem;margin-bottom:12px">🎓</div>
+    <h1>مركز الاندلس للتدريب</h1>
+    <p>تسجيل الدخول إلى النظام</p>
+    <input type="text" id="loginUser" placeholder="اسم المستخدم">
+    <input type="password" id="loginPass" placeholder="كلمة المرور">
+    <button onclick="doLogin()">دخول</button>
+    <div id="loginError">❌ اسم المستخدم أو كلمة المرور غلط</div>
+  </div>
+</div>
+
+<div id="mainApp">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div style="font-size:2rem">🎓</div>
+      <h2>مركز الاندلس<br>للتدريب</h2>
+      <span>نظام الإدارة</span>
+    </div>
+    <nav id="sideNav">
+      <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">📊</span> لوحة التحكم</div>
+      <div class="nav-item" onclick="showPage('students')"><span class="icon">👥</span> الطلاب</div>
+      <div class="nav-item" onclick="showPage('reservations')"><span class="icon">📌</span> الحجوزات</div>
+      <div class="nav-item" onclick="showPage('payments')"><span class="icon">💰</span> المصروفات</div>
+      <div class="nav-item" onclick="showPage('attendance')"><span class="icon">📋</span> الحضور والغياب</div>
+      <div class="nav-item" onclick="showPage('lectures')"><span class="icon">🎓</span> المحاضرات</div>
+      <div class="nav-item" onclick="showPage('programs')"><span class="icon">📚</span> البرامج والكورسات</div>
+      <div class="nav-item" onclick="showPage('subjects')"><span class="icon">📝</span> المواد الدراسية</div>
+      <div class="nav-item admin-only" onclick="showPage('expenses')"><span class="icon">🧾</span> مصروفات المركز</div>
+      <div class="nav-item admin-only" onclick="showPage('activity')"><span class="icon">🕐</span> سجل النشاط</div>
+      <div class="nav-item admin-only" onclick="showPage('users')"><span class="icon">👤</span> المستخدمون</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div id="userInfo"></div>
+      <button id="logoutBtn" onclick="doLogout()">🚪 تسجيل الخروج</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-header flex justify-between items-center flex-wrap gap-2">
+        <div><h1>لوحة التحكم</h1><p id="dashDate"></p></div>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap">
+        <div class="card">
+          <div class="card-header"><h3>⚠️ متأخرون عن المصروفات</h3></div>
+          <div class="card-body" id="latePaymentsDash"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>📌 آخر الحجوزات</h3></div>
+          <div class="card-body" id="recentReservationsDash"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>👥 آخر الطلاب المسجلين</h3></div>
+        <div class="card-body"><div class="table-wrap"><table id="recentTable"><thead><tr><th>الاسم</th><th>البرنامج</th><th>الفرع</th><th>تاريخ التسجيل</th></tr></thead><tbody></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- STUDENTS -->
+    <div id="page-students" class="page">
+      <div class="page-header flex justify-between items-center flex-wrap gap-2">
+        <div><h1>الطلاب</h1><p>إدارة بيانات الطلاب</p></div>
+        <div class="flex gap-2 flex-wrap">
+          <button class="btn btn-primary" onclick="openStudentModal()">➕ إضافة طالب</button>
+          <button class="btn btn-success admin-only" onclick="exportStudentsExcel()">📊 Excel</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="search-bar">
+            <input type="text" id="studentSearch" placeholder="🔍 ابحث بالاسم أو رقم القيد..." oninput="filterStudents()">
+            <select id="filterBranch" onchange="filterStudents()">
+              <option value="">كل الفروع</option>
+              <option>كفر الدوار - قاعة نادي المعلمين</option>
+              <option>فيكتوريا - قاعة جليم</option>
+            </select>
+            <select id="filterProgram" onchange="filterStudents()"><option value="">كل البرامج</option></select>
+          </div>
+          <div class="table-wrap">
+            <table><thead><tr><th>رقم القيد</th><th>الصورة</th><th>الاسم</th><th>البرنامج</th><th>الفرع</th><th>هاتف</th><th>تاريخ التسجيل</th><th>إجراءات</th></tr></thead>
+            <tbody id="studentsTbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESERVATIONS -->
+    <div id="page-reservations" class="page">
+      <div class="page-header flex justify-between items-center flex-wrap gap-2">
+        <div><h1>الحجوزات المبدئية</h1><p>استفسارات وحجوزات قبل التسجيل الرسمي</p></div>
+        <button class="btn btn-primary" onclick="openReservationModal()">➕ إضافة حجز</button>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="table-wrap">
+            <table><thead><tr><th>الاسم</th><th>الهاتف</th><th>البرنامج</th><th>الفرع</th><th>الحالة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+            <tbody id="reservationsTbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div id="page-payments" class="page">
+      <div class="page-header flex justify-between items-center flex-wrap gap-2">
+        <div><h1>المصروفات</h1><p>متابعة مدفوعات الطلاب</p></div>
+        <div class="flex gap-2">
+          <select id="paymentStudentFilter" onchange="loadStudentPayments()" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-family:inherit">
+            <option value="">اختر طالب...</option>
+          </select>
+          <button class="btn btn-success admin-only" onclick="exportPaymentsExcel()">📊 Excel</button>
+        </div>
+      </div>
+      <div id="paymentsContent">
+        <div class="empty-state"><div class="icon">💰</div><p>اختر طالب لعرض مصروفاته</p></div>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div id="page-attendance" class="page">
+      <div class="page-header"><h1>الحضور والغياب</h1></div>
+      <div class="card">
+        <div class="card-body">
+          <div class="flex gap-3 flex-wrap mb-3 items-center">
+            <div class="form-group" style="flex:1;min-width:140px"><label>التاريخ</label><input type="date" id="attDate"></div>
+            <div class="form-group" style="flex:2;min-width:200px"><label>البرنامج</label><select id="attProgram" onchange="loadAttendance()"><option value="">اختر...</option></select></div>
+            <button class="btn btn-primary" onclick="saveAttendance()" style="margin-top:20px">💾 حفظ</button>
+          </div>
+          <div id="attendanceGrid" class="attendance-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LECTURES -->
+    <div id="page-lectures" class="page">
+      <div class="page-header flex justify-between items-center flex-wrap gap-2">
+        <div><h1>المحاضرات</h1><p>إدارة المحاضرات وتسجيل الحضور</p></div>
+        <button class="btn btn-primary" onclick="openLectureModal()">➕ إضافة محاضرة</button>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="table-wrap">
+            <table><thead><tr><th>اسم المحاضرة</th><th>المحاضر</th><th>المادة</th><th>البرنامج</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+            <tbody id="lecturesTbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRAMS -->
+    <div id="page-programs" class="page">
+      <div class="page-header flex justify-between items-center">
+        <div><h1>البرامج والكورسات</h1></div>
+        <button class="btn btn-primary admin-only" onclick="openProgramModal()">➕ إضافة</button>
+      </div>
+      <div id="programsList"></div>
+    </div>
+
+    <!-- SUBJECTS -->
+    <div id="page-subjects" class="page">
+      <div class="page-header flex justify-between items-center">
+        <div><h1>المواد الدراسية</h1></div>
+        <button class="btn btn-primary admin-only" onclick="openSubjectModal()">➕ إضافة مادة</button>
+      </div>
+      <div class="card"><div class="card-body">
+        <div class="table-wrap"><table><thead><tr><th>#</th><th>اسم المادة</th><th>الدرجة العظمى</th><th>درجة النجاح</th><th>إجراءات</th></tr></thead>
+        <tbody id="subjectsTbody"></tbody></table></div>
+      </div></div>
+    </div>
+
+    <!-- EXPENSES -->
+    <div id="page-expenses" class="page admin-only-page">
+      <div class="page-header flex justify-between items-center flex-wrap gap-2">
+        <div><h1>مصروفات المركز</h1></div>
+        <div class="flex gap-2">
+          <button class="btn btn-primary" onclick="openExpenseModal()">➕ إضافة مصروف</button>
+          <button class="btn btn-warning" onclick="printExpenses()">🖨️ طباعة</button>
+        </div>
+      </div>
+      <div class="stats-grid" id="financeStats"></div>
+      <div class="card"><div class="card-body">
+        <div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>البيان</th><th>الفئة</th><th>المبلغ</th><th>إجراءات</th></tr></thead>
+        <tbody id="expensesTbody"></tbody></table></div>
+      </div></div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div id="page-activity" class="page admin-only-page">
+      <div class="page-header"><h1>سجل النشاط</h1></div>
+      <div class="card"><div class="card-body" id="activityLog"></div></div>
+    </div>
+
+    <!-- USERS -->
+    <div id="page-users" class="page admin-only-page">
+      <div class="page-header flex justify-between items-center">
+        <div><h1>المستخدمون</h1></div>
+        <button class="btn btn-primary" onclick="openUserModal()">➕ إضافة موظف</button>
+      </div>
+      <div class="card"><div class="card-body">
+        <div class="table-wrap"><table><thead><tr><th>الاسم</th><th>اليوزرنيم</th><th>الدور</th><th>الفرع</th><th>تحكم كامل</th><th>آخر دخول</th><th>إجراءات</th></tr></thead>
+        <tbody id="usersTbody"></tbody></table></div>
+      </div></div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="page-profile" class="page">
+      <div class="page-header no-print">
+        <button class="btn btn-outline btn-sm" onclick="showPage('students')">→ رجوع للطلاب</button>
+      </div>
+      <div id="profileContent"></div>
+    </div>
+
+    <!-- LECTURE ATTENDANCE -->
+    <div id="page-lecture-att" class="page">
+      <div class="page-header flex justify-between items-center no-print">
+        <button class="btn btn-outline btn-sm" onclick="showPage('lectures')">→ رجوع</button>
+        <h1 id="lectureAttTitle">حضور المحاضرة</h1>
+        <button class="btn btn-primary" onclick="saveLectureAttendance()">💾 حفظ</button>
+      </div>
+      <div class="attendance-grid" id="lectureAttGrid"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════ MODALS ═══════════ -->
+<div id="modalOverlay" class="modal-overlay hidden" onclick="closeModal(event)">
+
+  <!-- STUDENT MODAL -->
+  <div id="studentModal" class="modal hidden">
+    <div class="modal-header"><h3 id="studentModalTitle">إضافة طالب جديد</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editStudentId">
+      <div class="mb-3">
+        <label style="font-weight:600;font-size:.85rem;display:block;margin-bottom:8px">صورة الطالب</label>
+        <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
+          <div id="photoPreview" style="font-size:2rem">📷</div>
+          <p style="color:var(--muted);font-size:.85rem;margin-top:8px">انقر لرفع صورة</p>
+          <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="previewPhoto(event)">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>رقم القيد *</label><input type="text" id="sId" placeholder="ALS-2024-001"></div>
+        <div class="form-group"><label>الاسم الكامل *</label><input type="text" id="sName"></div>
+        <div class="form-group"><label>السن</label><input type="number" id="sAge" min="14" max="60"></div>
+        <div class="form-group"><label>المؤهل</label><input type="text" id="sQual"></div>
+        <div class="form-group"><label>العنوان</label><input type="text" id="sAddress"></div>
+        <div class="form-group"><label>هاتف الطالب</label><input type="tel" id="sPhone"></div>
+        <div class="form-group"><label>اسم ولي الأمر</label><input type="text" id="sParent"></div>
+        <div class="form-group"><label>هاتف ولي الأمر</label><input type="tel" id="sParentPhone"></div>
+        <div class="form-group"><label>الفرع</label>
+          <select id="sBranch"><option>كفر الدوار - قاعة نادي المعلمين</option><option>فيكتوريا - قاعة جليم</option></select>
+        </div>
+        <div class="form-group"><label>البرنامج/الكورس</label><select id="sProgram" onchange="showProgramFees()"></select></div>
+        <div class="form-group"><label>تاريخ التسجيل</label><input type="date" id="sDate"></div>
+      </div>
+      <div id="programFeesInfo" style="display:none;margin-top:16px;background:#e8f4fd;border-radius:10px;padding:14px;border-right:4px solid var(--primary)">
+        <b style="color:var(--primary)">💰 التفاصيل المالية للبرنامج</b>
+        <div id="programFeesDetails" style="margin-top:10px;font-size:.875rem;display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveStudent()">💾 حفظ</button>
+    </div>
+  </div>
+
+  <!-- RESERVATION MODAL -->
+  <div id="reservationModal" class="modal hidden">
+    <div class="modal-header"><h3>إضافة حجز مبدئي</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editReservationId">
+      <div class="form-grid">
+        <div class="form-group"><label>الاسم *</label><input type="text" id="rName"></div>
+        <div class="form-group"><label>الهاتف</label><input type="tel" id="rPhone"></div>
+        <div class="form-group"><label>هاتف ولي الأمر</label><input type="tel" id="rParentPhone"></div>
+        <div class="form-group"><label>البرنامج</label><select id="rProgram"></select></div>
+        <div class="form-group"><label>الفرع</label>
+          <select id="rBranch"><option>كفر الدوار - قاعة نادي المعلمين</option><option>فيكتوريا - قاعة جليم</option></select>
+        </div>
+        <div class="form-group"><label>الحالة</label>
+          <select id="rStatus"><option>استفسار</option><option>حجز</option><option>مؤكد</option><option>ملغي</option></select>
+        </div>
+      </div>
+      <div class="form-group mt-3"><label>ملاحظات</label><textarea id="rNotes"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveReservation()">💾 حفظ</button>
+    </div>
+  </div>
+
+  <!-- PROGRAM MODAL -->
+  <div id="programModal" class="modal hidden">
+    <div class="modal-header"><h3>إضافة برنامج/كورس</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>الاسم *</label><input type="text" id="pName"></div>
+        <div class="form-group"><label>النوع</label><select id="pType"><option value="برنامج">برنامج</option><option value="كورس">كورس/دورة</option></select></div>
+        <div class="form-group"><label>المدة</label><input type="text" id="pDuration" placeholder="9 شهور"></div>
+        <div class="form-group"><label>الرسوم (ج)</label><input type="number" id="pFees"></div>
+        <div class="form-group"><label>المقدم (ج)</label><input type="number" id="pDeposit"></div>
+        <div class="form-group"><label>النظام</label><select id="pSystem"><option value="">-</option><option value="أساسي">أساسي</option><option value="احترافي">احترافي</option></select></div>
+      </div>
+      <div class="form-group mt-3"><label>ملاحظات</label><textarea id="pNotes"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" onclick="saveProgram()">💾 حفظ</button></div>
+  </div>
+
+  <!-- SUBJECT MODAL -->
+  <div id="subjectModal" class="modal hidden">
+    <div class="modal-header"><h3 id="subjectModalTitle">إضافة مادة</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editSubjectId">
+      <div class="form-grid">
+        <div class="form-group"><label>اسم المادة *</label><input type="text" id="subName"></div>
+        <div class="form-group"><label>الدرجة العظمى *</label><input type="number" id="subMax" min="1"></div>
+        <div class="form-group"><label>درجة النجاح</label><input type="number" id="subPass" min="1"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" onclick="saveSubject()">💾 حفظ</button></div>
+  </div>
+
+  <!-- USER MODAL -->
+  <div id="userModal" class="modal hidden">
+    <div class="modal-header"><h3 id="userModalTitle">إضافة موظف</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editUserId">
+      <div class="form-grid">
+        <div class="form-group"><label>الاسم الكامل *</label><input type="text" id="uName"></div>
+        <div class="form-group"><label>اسم المستخدم *</label><input type="text" id="uUsername"></div>
+        <div class="form-group"><label>كلمة المرور *</label><input type="password" id="uPassword" placeholder="اتركه فارغ للإبقاء على الحالي"></div>
+        <div class="form-group"><label>الدور</label><select id="uRole"><option value="موظف">موظف</option><option value="مدير">مدير</option></select></div>
+        <div class="form-group"><label>الفرع</label>
+          <select id="uBranch"><option value="الفرعين">الفرعين</option><option value="كفر الدوار - قاعة نادي المعلمين">كفر الدوار</option><option value="فيكتوريا - قاعة جليم">فيكتوريا</option></select>
+        </div>
+        <div class="form-group"><label>تحكم كامل (صلاحيات المدير)</label>
+          <select id="uFullControl"><option value="false">لا</option><option value="true">نعم</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" onclick="saveUser()">💾 حفظ</button></div>
+  </div>
+
+  <!-- PROCEDURE MODAL -->
+  <div id="procedureModal" class="modal hidden">
+    <div class="modal-header"><h3>إضافة إجراء</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="procStudentId">
+      <div class="form-grid">
+        <div class="form-group"><label>نوع الإجراء *</label><select id="procType"><option>تأخر مصاريف</option><option>استدعاء</option><option>إنذار</option><option>فصل</option><option>أخرى</option></select></div>
+        <div class="form-group"><label>رقم القرار</label><input type="text" id="procNum" placeholder="001/2024"></div>
+        <div class="form-group"><label>التاريخ</label><input type="date" id="procDate"></div>
+      </div>
+      <div class="form-group mt-3"><label>التفاصيل *</label><textarea id="procDetails"></textarea></div>
+      <div class="form-group mt-2"><label>النتيجة / ما تم</label><textarea id="procResult"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" onclick="saveProcedure()">💾 حفظ</button></div>
+  </div>
+
+  <!-- LECTURE MODAL -->
+  <div id="lectureModal" class="modal hidden">
+    <div class="modal-header"><h3>إضافة محاضرة</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>اسم المحاضرة *</label><input type="text" id="lName"></div>
+        <div class="form-group"><label>اسم المحاضر</label><input type="text" id="lLecturer"></div>
+        <div class="form-group"><label>المادة</label><select id="lSubject"><option value="">اختر...</option></select></div>
+        <div class="form-group"><label>البرنامج</label><select id="lProgram"><option value="">اختر...</option></select></div>
+        <div class="form-group"><label>التاريخ *</label><input type="date" id="lDate"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" onclick="saveLecture()">💾 حفظ</button></div>
+  </div>
+
+  <!-- EXPENSE MODAL -->
+  <div id="expenseModal" class="modal hidden">
+    <div class="modal-header"><h3>إضافة مصروف</h3><button class="close-btn" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>التاريخ *</label><input type="date" id="expDate"></div>
+        <div class="form-group"><label>المبلغ (ج) *</label><input type="number" id="expAmount"></div>
+        <div class="form-group"><label>الفئة</label><select id="expCat"><option>رواتب</option><option>إيجار</option><option>مستلزمات</option><option>صيانة</option><option>تسويق</option><option>أخرى</option></select></div>
+        <div class="form-group"><label>البيان *</label><input type="text" id="expDesc"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">إلغاء</button><button class="btn btn-primary" onclick="saveExpense()">💾 حفظ</button></div>
+  </div>
+
+</div>
+
+<script>
+const SURL='https://uvwarprsghwvrfmdaaqv.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2d2FycHJzZ2h3dnJmbWRhYXF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyOTgzNjQsImV4cCI6MjA5Njg3NDM2NH0.bPfXaNqmWUIM7pYU8rHfRtHNs6Z7fsZs2nf8-Vo5T7E';
+
+let currentUser=null,allStudents=[],allPrograms=[],allSubjects=[],allUsers=[],allLectures=[],allExpenses=[],allReservations=[];
+let photoBase64=null,currentProfileId=null;
+
+// ─── SUPABASE ───
+async function sb(table,method='GET',body=null,extra=''){
+  const res=await fetch(`${SURL}/rest/v1/${table}${extra}`,{
+    method,headers:{'apikey':SKEY,'Authorization':`Bearer ${SKEY}`,'Content-Type':'application/json',
+    'Prefer':method==='POST'?'return=representation':method==='PATCH'?'return=representation':''},
+    body:body?JSON.stringify(body):null
+  });
+  if(!res.ok){const e=await res.text();console.error(e);return null;}
+  const ct=res.headers.get('content-type');
+  if(ct&&ct.includes('json'))return res.json();
+  return null;
+}
+const sbGet=(t,q='')=>sb(t,'GET',null,q);
+const sbPost=(t,d)=>sb(t,'POST',d);
+const sbPatch=(t,d,q)=>sb(t,'PATCH',d,q);
+const sbDel=(t,q)=>sb(t,'DELETE',null,q);
+
+async function uploadFile(bucket,path,file){
+  const r=await fetch(`${SURL}/storage/v1/object/${bucket}/${path}`,{
+    method:'POST',headers:{'apikey':SKEY,'Authorization':`Bearer ${SKEY}`,'Content-Type':file.type||'application/octet-stream','x-upsert':'true'},body:file
+  });
+  if(r.ok)return`${SURL}/storage/v1/object/public/${bucket}/${path}`;
+  return null;
+}
+
+// ─── LOGIN ───
+async function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(!u||!p)return;
+  const users=await sbGet('users',`?username=eq.${encodeURIComponent(u)}&password=eq.${encodeURIComponent(p)}`);
+  if(!users||!users.length){document.getElementById('loginError').style.display='block';return;}
+  currentUser=users[0];
+  await sbPatch('users',{last_login:new Date().toISOString()},`?id=eq.${currentUser.id}`);
+  await logActivity('دخول','دخل النظام');
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  document.getElementById('loginError').style.display='none';
+  const isAdmin=currentUser.role==='مدير'||currentUser.full_control;
+  document.getElementById('userInfo').innerHTML=`<b style="color:white">${currentUser.full_name}</b><br>${currentUser.role}`;
+  if(!isAdmin){document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');}
+  await initApp();
+}
+async function doLogout(){
+  await logActivity('خروج','خرج من النظام');
+  currentUser=null;
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('loginPage').style.display!=='none')doLogin();});
+
+// ─── ACTIVITY ───
+async function logActivity(type,details){
+  if(!currentUser)return;
+  await sbPost('activity_log',{user_name:currentUser.full_name,action_type:type,details,created_at:new Date().toISOString()});
+}
+
+// ─── INIT ───
+async function initApp(){
+  [allStudents,allPrograms,allSubjects,allUsers,allLectures,allExpenses,allReservations]=await Promise.all([
+    sbGet('students','?order=created_at.desc')||[],
+    sbGet('programs','?order=name.asc')||[],
+    sbGet('subjects','?order=id.asc')||[],
+    sbGet('users','?order=created_at.asc')||[],
+    sbGet('lectures','?order=lecture_date.desc')||[],
+    sbGet('expenses','?order=expense_date.desc')||[],
+    sbGet('reservations','?order=created_at.desc')||[]
+  ]);
+  allStudents=allStudents||[];allPrograms=allPrograms||[];allSubjects=allSubjects||[];
+  allUsers=allUsers||[];allLectures=allLectures||[];allExpenses=allExpenses||[];allReservations=allReservations||[];
+  document.getElementById('dashDate').textContent=new Date().toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  populateDropdowns();
+  renderDashboard();renderStudents();renderPrograms();renderSubjects();
+  renderUsers();renderActivityLog();renderLectures();renderExpenses();renderReservations();
+  document.getElementById('attDate').value=new Date().toISOString().split('T')[0];
+  populatePaymentFilter();
+}
+
+// ─── NAV ───
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  const pg=document.getElementById('page-'+p);
+  if(pg)pg.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.onclick&&n.onclick.toString().includes(`'${p}'`))n.classList.add('active');
+  });
+}
+
+// ─── DROPDOWNS ───
+function populateDropdowns(){
+  const opts=allPrograms.map(p=>{
+    const lbl=p.system?`${p.name} - ${p.system}`:p.name;
+    return`<option value="${lbl}">${lbl}</option>`;
+  }).join('');
+  document.getElementById('sProgram').innerHTML=opts||'<option>لا يوجد</option>';
+  document.getElementById('filterProgram').innerHTML='<option value="">كل البرامج</option>'+opts;
+  document.getElementById('attProgram').innerHTML='<option value="">اختر...</option>'+opts;
+  document.getElementById('rProgram').innerHTML=opts||'<option>لا يوجد</option>';
+  document.getElementById('lProgram').innerHTML='<option value="">اختر...</option>'+opts;
+  document.getElementById('lSubject').innerHTML='<option value="">اختر...</option>'+allSubjects.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+}
+
+function populatePaymentFilter(){
+  document.getElementById('paymentStudentFilter').innerHTML='<option value="">اختر طالب...</option>'+
+    allStudents.map(s=>`<option value="${s.id}">${s.name} - ${s.program||''}</option>`).join('');
+}
+
+// ─── DASHBOARD ───
+async function renderDashboard(){
+  const totalRevenue=await getTotalRevenue();
+  const stats=[
+    {icon:'👥',label:'إجمالي الطلاب',value:allStudents.length,color:'#e8f0fb',ic:'#1a6eb5'},
+    {icon:'📌',label:'الحجوزات',value:allReservations.filter(r=>r.status!=='ملغي').length,color:'#fff8e1',ic:'#ff9800'},
+    {icon:'💰',label:'إجمالي الإيرادات',value:totalRevenue.toLocaleString()+' ج',color:'#e8f7f0',ic:'#28a745'},
+    {icon:'🏫',label:'كفر الدوار',value:allStudents.filter(s=>s.branch&&s.branch.includes('كفر')).length,color:'#f3e5f5',ic:'#9c27b0'},
+    {icon:'🏫',label:'فيكتوريا',value:allStudents.filter(s=>s.branch&&s.branch.includes('فيكتوريا')).length,color:'#fce4ec',ic:'#e91e63'},
+  ];
+  document.getElementById('statsGrid').innerHTML=stats.map(s=>`
+    <div class="stat-card">
+      <div class="stat-icon" style="background:${s.color}"><span>${s.icon}</span></div>
+      <div class="stat-info"><h3 style="color:${s.ic}">${s.value}</h3><p>${s.label}</p></div>
+    </div>`).join('');
+  // late payments
+  const payments=await sbGet('payments','?is_paid=eq.false&order=due_date.asc')||[];
+  const today=new Date();
+  const late=payments.filter(p=>{
+    if(!p.due_date)return false;
+    const d=new Date(p.due_date);
+    return d<today;
+  }).slice(0,5);
+  document.getElementById('latePaymentsDash').innerHTML=late.length?late.map(p=>{
+    const s=allStudents.find(x=>x.id==p.student_id);
+    const days=Math.floor((today-new Date(p.due_date))/(1000*60*60*24));
+    return`<div style="padding:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div><b>${s?.name||'-'}</b><br><small style="color:var(--muted)">${p.payment_type}</small></div>
+      <span class="badge ${days>5?'badge-danger':'badge-warning'}">${days} يوم تأخير</span>
+    </div>`;
+  }).join(''):'<div style="color:var(--muted);padding:16px;text-align:center">لا يوجد متأخرون</div>';
+  // recent reservations
+  document.getElementById('recentReservationsDash').innerHTML=allReservations.slice(0,5).map(r=>`
+    <div style="padding:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div><b>${r.name}</b><br><small style="color:var(--muted)">${r.program||'-'}</small></div>
+      <span class="badge ${r.status==='مؤكد'?'badge-success':r.status==='ملغي'?'badge-danger':'badge-warning'}">${r.status}</span>
+    </div>`).join('')||'<div style="color:var(--muted);padding:16px;text-align:center">لا يوجد حجوزات</div>';
+  // recent students
+  document.querySelector('#recentTable tbody').innerHTML=allStudents.slice(0,8).map(s=>`
+    <tr><td>${s.name}</td><td>${s.program||'-'}</td><td>${s.branch?s.branch.split('-')[0].trim():'-'}</td><td>${s.enrollment_date||'-'}</td></tr>`).join('');
+}
+
+async function getTotalRevenue(){
+  const payments=await sbGet('payments','?is_paid=eq.true')||[];
+  return payments.reduce((a,p)=>a+(+p.paid_amount||0),0);
+}
+
+// ─── STUDENTS ───
+function renderStudents(list){
+  const students=list||allStudents;
+  const tbody=document.getElementById('studentsTbody');
+  const isAdmin=currentUser?.role==='مدير'||currentUser?.full_control;
+  if(!students.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">👥</div><p>لا يوجد طلاب</p></div></td></tr>';return;}
+  tbody.innerHTML=students.map(s=>`
+    <tr>
+      <td><b>${s.enrollment_number||'-'}</b></td>
+      <td>${s.photo_url?`<img src="${s.photo_url}" style="width:36px;height:36px;border-radius:50%;object-fit:cover">`:'👤'}</td>
+      <td><b>${s.name}</b></td>
+      <td>${s.program||'-'}</td>
+      <td><span class="badge ${s.branch&&s.branch.includes('كفر')?'badge-info':'badge-warning'}">${s.branch?s.branch.split('-')[0].trim():'-'}</span></td>
+      <td>${s.phone||'-'}</td>
+      <td>${s.enrollment_date||'-'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-primary btn-xs" onclick="openProfile('${s.id}')">👤</button>
+        <button class="btn btn-warning btn-xs" onclick="editStudent('${s.id}')">✏️</button>
+        ${isAdmin?`<button class="btn btn-danger btn-xs" onclick="deleteStudent('${s.id}')">🗑️</button>`:''}
+        ${s.parent_phone?`<a href="https://wa.me/2${s.parent_phone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('السلام عليكم، رسالة من مركز الاندلس للتدريب\nبخصوص: '+s.name+'\nللتواصل: 01286868182')}" target="_blank" class="btn btn-success btn-xs">📲</a>`:''}
+      </td>
+    </tr>`).join('');
+}
+
+function filterStudents(){
+  const q=document.getElementById('studentSearch').value.toLowerCase();
+  const b=document.getElementById('filterBranch').value;
+  const p=document.getElementById('filterProgram').value;
+  renderStudents(allStudents.filter(s=>{
+    return(!q||s.name.toLowerCase().includes(q)||(s.enrollment_number||'').toLowerCase().includes(q))
+      &&(!b||s.branch===b)&&(!p||(s.program||'').includes(p));
+  }));
+}
+
+function openStudentModal(){
+  photoBase64=null;
+  document.getElementById('photoPreview').innerHTML='📷';
+  document.getElementById('photoInput').value='';
+  ['sId','sName','sAge','sQual','sAddress','sPhone','sParent','sParentPhone'].forEach(f=>document.getElementById(f).value='');
+  document.getElementById('sDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('editStudentId').value='';
+  document.getElementById('studentModalTitle').textContent='إضافة طالب جديد';
+  document.getElementById('programFeesInfo').style.display='none';
+  showModal('studentModal');
+}
+
+function editStudent(id){
+  const s=allStudents.find(x=>x.id==id);if(!s)return;
+  document.getElementById('editStudentId').value=id;
+  document.getElementById('sId').value=s.enrollment_number||'';
+  document.getElementById('sName').value=s.name||'';
+  document.getElementById('sAge').value=s.age||'';
+  document.getElementById('sQual').value=s.qualification||'';
+  document.getElementById('sAddress').value=s.address||'';
+  document.getElementById('sPhone').value=s.phone||'';
+  document.getElementById('sParent').value=s.parent_name||'';
+  document.getElementById('sParentPhone').value=s.parent_phone||'';
+  document.getElementById('sBranch').value=s.branch||'';
+  document.getElementById('sProgram').value=s.program||'';
+  document.getElementById('sDate').value=s.enrollment_date||'';
+  if(s.photo_url)document.getElementById('photoPreview').innerHTML=`<img src="${s.photo_url}" style="width:80px;height:80px;border-radius:50%;object-fit:cover">`;
+  document.getElementById('studentModalTitle').textContent='تعديل بيانات الطالب';
+  showProgramFees();
+  showModal('studentModal');
+}
+
+async function saveStudent(){
+  const editId=document.getElementById('editStudentId').value;
+  const name=document.getElementById('sName').value.trim();
+  if(!name){alert('الاسم مطلوب');return;}
+  let photoUrl=null;
+  if(photoBase64){
+    const pf=document.getElementById('photoInput').files[0];
+    if(pf)photoUrl=await uploadFile('student-photos',`${Date.now()}.${pf.name.split('.').pop()}`,pf);
+  }
+  const data={enrollment_number:document.getElementById('sId').value,name,age:document.getElementById('sAge').value||null,
+    qualification:document.getElementById('sQual').value,address:document.getElementById('sAddress').value,
+    phone:document.getElementById('sPhone').value,parent_name:document.getElementById('sParent').value,
+    parent_phone:document.getElementById('sParentPhone').value,branch:document.getElementById('sBranch').value,
+    program:document.getElementById('sProgram').value,enrollment_date:document.getElementById('sDate').value};
+  if(photoUrl)data.photo_url=photoUrl;
+  if(editId){
+    await sbPatch('students',data,`?id=eq.${editId}`);
+    await logActivity('تعديل طالب',`تعديل: ${name}`);
+  }else{
+    data.created_at=new Date().toISOString();
+    const res=await sbPost('students',data);
+    if(res&&res[0])await initStudentPayments(res[0].id,document.getElementById('sProgram').value);
+    await logActivity('إضافة طالب',`إضافة: ${name}`);
+  }
+  closeModal();
+  allStudents=await sbGet('students','?order=created_at.desc')||[];
+  renderStudents();renderDashboard();populatePaymentFilter();
+}
+
+async function deleteStudent(id){
+  const s=allStudents.find(x=>x.id==id);
+  if(!confirm(`حذف الطالب "${s?.name}"؟`))return;
+  await sbDel('students',`?id=eq.${id}`);
+  await logActivity('حذف طالب',`حذف: ${s?.name}`);
+  allStudents=await sbGet('students','?order=created_at.desc')||[];
+  renderStudents();renderDashboard();populatePaymentFilter();
+}
+
+function previewPhoto(e){
+  const file=e.target.files[0];if(!file)return;
+  photoBase64=true;
+  const reader=new FileReader();
+  reader.onload=ev=>{document.getElementById('photoPreview').innerHTML=`<img src="${ev.target.result}" style="width:80px;height:80px;border-radius:50%;object-fit:cover">`;};
+  reader.readAsDataURL(file);
+}
+
+function showProgramFees(){
+  const val=document.getElementById('sProgram').value;
+  const p=allPrograms.find(x=>(x.system?`${x.name} - ${x.system}`:x.name)===val);
+  const info=document.getElementById('programFeesInfo');
+  if(!p||!p.fees){info.style.display='none';return;}
+  const rem=(p.fees||0)-(p.deposit||0);
+  const months=p.duration?parseInt(p.duration):null;
+  const monthly=months&&months>0?Math.round(rem/months):null;
+  document.getElementById('programFeesDetails').innerHTML=`
+    <div>📋 <b>النظام:</b> ${p.system||'-'}</div>
+    <div>⏱ <b>المدة:</b> ${p.duration||'-'}</div>
+    <div>💰 <b>إجمالي:</b> ${Number(p.fees).toLocaleString()} ج</div>
+    <div>💳 <b>مقدم:</b> ${Number(p.deposit||0).toLocaleString()} ج</div>
+    <div>📆 <b>الباقي:</b> ${rem.toLocaleString()} ج</div>
+    ${monthly?`<div>🗓 <b>القسط:</b> ~${monthly.toLocaleString()} ج</div>`:''}
+    <div>📁 <b>فتح ملف:</b> 350 ج</div>
+    <div>🎒 <b>شنطة أدوات:</b> 500 ج</div>`;
+  info.style.display='block';
+}
+
+// ─── INIT STUDENT PAYMENTS ───
+async function initStudentPayments(studentId,programLabel){
+  const p=allPrograms.find(x=>(x.system?`${x.name} - ${x.system}`:x.name)===programLabel);
+  if(!p||!p.fees)return;
+  const months=p.duration?parseInt(p.duration):9;
+  const rem=(p.fees||0)-(p.deposit||0);
+  const monthly=Math.round(rem/months);
+  const today=new Date();
+  const entries=[
+    {payment_type:'شنطة أدوات',amount:500,month_number:0},
+    {payment_type:'فتح ملف',amount:350,month_number:0},
+    {payment_type:'مقدم',amount:p.deposit||2000,month_number:0},
+  ];
+  for(let i=1;i<=months;i++){
+    const due=new Date(today.getFullYear(),today.getMonth()+i,1);
+    entries.push({payment_type:`قسط ${i}`,amount:monthly,month_number:i,due_date:due.toISOString().split('T')[0]});
+  }
+  for(const e of entries){
+    await sbPost('payments',{student_id:studentId,...e,is_paid:false,created_at:new Date().toISOString()});
+  }
+}
+
+// ─── PAYMENTS PAGE ───
+async function loadStudentPayments(){
+  const sid=document.getElementById('paymentStudentFilter').value;
+  if(!sid){document.getElementById('paymentsContent').innerHTML='<div class="empty-state"><div class="icon">💰</div><p>اختر طالب</p></div>';return;}
+  const s=allStudents.find(x=>x.id==sid);
+  const payments=await sbGet('payments',`?student_id=eq.${sid}&order=month_number.asc`)||[];
+  const today=new Date();
+  let totalPaid=0,totalDue=0;
+  payments.forEach(p=>{totalDue+=+p.amount||0;if(p.is_paid)totalPaid+=+p.paid_amount||+p.amount||0;});
+  document.getElementById('paymentsContent').innerHTML=`
+    <div class="profile-header" style="margin-bottom:20px">
+      <div class="profile-photo">${s?.photo_url?`<img src="${s.photo_url}">`:'👤'}</div>
+      <div class="profile-info">
+        <h2>${s?.name}</h2>
+        <p>${s?.program||'-'} | ${s?.branch?s.branch.split('-')[0].trim():'-'}</p>
+        <p>💰 إجمالي: ${totalDue.toLocaleString()} ج | ✅ مدفوع: ${totalPaid.toLocaleString()} ج | ⏳ متبقي: ${(totalDue-totalPaid).toLocaleString()} ج</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>جدول المدفوعات</h3><button class="btn btn-warning btn-sm no-print" onclick="window.print()">🖨️ طباعة</button></div>
+      <div class="card-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>البيان</th><th>المبلغ</th><th>تاريخ الاستحقاق</th><th>تاريخ الدفع</th><th>حالة</th><th>غرامة تأخير</th><th>استثناء</th><th>إجراء</th></tr></thead>
+            <tbody>
+              ${payments.map(p=>{
+                const due=p.due_date?new Date(p.due_date):null;
+                const daysLate=due&&!p.is_paid?Math.floor((today-due)/(1000*60*60*24)):0;
+                const hasPenalty=due&&!p.is_paid&&daysLate>5;
+                let rowClass=p.is_paid?'paid':daysLate>5?'overdue':daysLate>0?'pending-warn':'';
+                return`<tr class="${rowClass}">
+                  <td><b>${p.payment_type}</b></td>
+                  <td>${Number(p.amount).toLocaleString()} ج</td>
+                  <td>${p.due_date||'-'}</td>
+                  <td>${p.payment_date||'-'}</td>
+                  <td>${p.is_paid?'<span class="badge badge-success">✅ مدفوع</span>':daysLate>5?'<span class="badge badge-danger">🔴 متأخر</span>':daysLate>0?'<span class="badge badge-warning">🟡 قارب الموعد</span>':'<span class="badge badge-secondary">⏳ لم يُدفع</span>'}</td>
+                  <td>${hasPenalty&&!p.penalty_waived?'<span class="penalty-badge">غرامة تأخير</span>':p.penalty_waived?'<span class="badge badge-info">استثناء</span>':'-'}</td>
+                  <td>${hasPenalty&&!p.is_paid?`<button class="btn btn-info btn-xs" onclick="waivePenalty('${p.id}','${sid}')">استثناء</button>`:'-'}</td>
+                  <td>
+                    ${!p.is_paid?`<button class="btn btn-success btn-xs" onclick="markPaid('${p.id}','${sid}')">✅ دفع</button>`:''}
+                    ${p.is_paid?`<button class="btn btn-outline btn-xs" onclick="unmarkPaid('${p.id}','${sid}')">↩️</button>`:''}
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function markPaid(payId,sid){
+  const today=new Date().toISOString().split('T')[0];
+  await sbPatch('payments',{is_paid:true,payment_date:today,paid_amount:(await sbGet('payments',`?id=eq.${payId}`))?.[0]?.amount},`?id=eq.${payId}`);
+  await logActivity('دفع قسط',`تسجيل دفع للطالب`);
+  loadStudentPayments();renderDashboard();
+}
+async function unmarkPaid(payId,sid){
+  await sbPatch('payments',{is_paid:false,payment_date:null},`?id=eq.${payId}`);
+  loadStudentPayments();
+}
+async function waivePenalty(payId,sid){
+  await sbPatch('payments',{penalty_waived:true},`?id=eq.${payId}`);
+  loadStudentPayments();
+}
+
+function exportPaymentsExcel(){
+  alert('اختر طالب أولاً لتصدير مدفوعاته');
+}
+
+// ─── RESERVATIONS ───
+function renderReservations(){
+  const tbody=document.getElementById('reservationsTbody');
+  if(!allReservations.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="icon">📌</div><p>لا يوجد حجوزات</p></div></td></tr>';return;}
+  tbody.innerHTML=allReservations.map(r=>`
+    <tr>
+      <td><b>${r.name}</b></td>
+      <td>${r.phone?`<a href="https://wa.me/2${r.phone.replace(/[^0-9]/g,'')}" target="_blank">📱 ${r.phone}</a>`:'-'}</td>
+      <td>${r.program||'-'}</td>
+      <td>${r.branch?r.branch.split('-')[0].trim():'-'}</td>
+      <td><span class="badge ${r.status==='مؤكد'?'badge-success':r.status==='ملغي'?'badge-danger':r.status==='حجز'?'badge-primary':'badge-warning'}">${r.status}</span></td>
+      <td>${r.created_at?new Date(r.created_at).toLocaleDateString('ar-EG'):'-'}</td>
+      <td>
+        <button class="btn btn-warning btn-xs" onclick="editReservation('${r.id}')">✏️</button>
+        <button class="btn btn-success btn-xs" onclick="convertToStudent('${r.id}')">👤 تحويل لطالب</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteReservation('${r.id}')">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+function openReservationModal(){
+  ['rName','rPhone','rParentPhone','rNotes'].forEach(f=>document.getElementById(f).value='');
+  document.getElementById('editReservationId').value='';
+  showModal('reservationModal');
+}
+function editReservation(id){
+  const r=allReservations.find(x=>x.id==id);if(!r)return;
+  document.getElementById('editReservationId').value=id;
+  document.getElementById('rName').value=r.name||'';
+  document.getElementById('rPhone').value=r.phone||'';
+  document.getElementById('rParentPhone').value=r.parent_phone||'';
+  document.getElementById('rProgram').value=r.program||'';
+  document.getElementById('rBranch').value=r.branch||'';
+  document.getElementById('rStatus').value=r.status||'حجز';
+  document.getElementById('rNotes').value=r.notes||'';
+  showModal('reservationModal');
+}
+async function saveReservation(){
+  const name=document.getElementById('rName').value.trim();
+  if(!name){alert('الاسم مطلوب');return;}
+  const editId=document.getElementById('editReservationId').value;
+  const data={name,phone:document.getElementById('rPhone').value,parent_phone:document.getElementById('rParentPhone').value,
+    program:document.getElementById('rProgram').value,branch:document.getElementById('rBranch').value,
+    status:document.getElementById('rStatus').value,notes:document.getElementById('rNotes').value};
+  if(editId)await sbPatch('reservations',data,`?id=eq.${editId}`);
+  else{data.created_at=new Date().toISOString();await sbPost('reservations',data);}
+  closeModal();
+  allReservations=await sbGet('reservations','?order=created_at.desc')||[];
+  renderReservations();renderDashboard();
+}
+async function deleteReservation(id){
+  if(!confirm('حذف الحجز؟'))return;
+  await sbDel('reservations',`?id=eq.${id}`);
+  allReservations=await sbGet('reservations','?order=created_at.desc')||[];
+  renderReservations();renderDashboard();
+}
+function convertToStudent(id){
+  const r=allReservations.find(x=>x.id==id);if(!r)return;
+  openStudentModal();
+  setTimeout(()=>{
+    document.getElementById('sName').value=r.name||'';
+    document.getElementById('sPhone').value=r.phone||'';
+    document.getElementById('sParentPhone').value=r.parent_phone||'';
+    document.getElementById('sProgram').value=r.program||'';
+    document.getElementById('sBranch').value=r.branch||'';
+    showProgramFees();
+  },100);
+}
+
+// ─── ATTENDANCE ───
+async function loadAttendance(){
+  const program=document.getElementById('attProgram').value;
+  const date=document.getElementById('attDate').value;
+  if(!program)return;
+  const filtered=allStudents.filter(s=>s.program===program);
+  if(!filtered.length){document.getElementById('attendanceGrid').innerHTML='<p style="color:var(--muted)">لا يوجد طلاب في هذا البرنامج</p>';return;}
+  const existing=await sbGet('attendance',`?date=eq.${date}&program=eq.${encodeURIComponent(program)}`)||[];
+  const existingMap={};existing.forEach(a=>{existingMap[a.student_id]=a.status;});
+  document.getElementById('attendanceGrid').innerHTML=filtered.map((s,i)=>`
+    <div class="attendance-card" data-student-id="${s.id}" data-student-name="${s.name}" data-parent-phone="${s.parent_phone||''}">
+      <div class="student-name">${s.name}</div>
+      <div class="att-buttons">
+        <button class="att-btn حاضر ${existingMap[s.id]==='حاضر'?'active':''}" onclick="setAtt(this)">✅ حاضر</button>
+        <button class="att-btn غائب ${existingMap[s.id]==='غائب'?'active':''}" onclick="setAtt(this)">❌ غائب</button>
+        <button class="att-btn متأخر ${existingMap[s.id]==='متأخر'?'active':''}" onclick="setAtt(this)">⏰ متأخر</button>
+      </div>
+    </div>`).join('');
+}
+function setAtt(btn){
+  btn.closest('.attendance-card').querySelectorAll('.att-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+async function saveAttendance(){
+  const date=document.getElementById('attDate').value;
+  const program=document.getElementById('attProgram').value;
+  if(!program||!date){alert('اختر البرنامج والتاريخ');return;}
+  const cards=document.querySelectorAll('#attendanceGrid .attendance-card');
+  const absent=[];
+  for(const card of cards){
+    const sid=card.dataset.studentId;
+    const activeBtn=card.querySelector('.att-btn.active');
+    const status=activeBtn?activeBtn.textContent.trim().replace(/[✅❌⏰]/,'').trim():'غير محدد';
+    await sbDel('attendance',`?student_id=eq.${sid}&date=eq.${date}`);
+    await sbPost('attendance',{student_id:sid,date,program,status,created_at:new Date().toISOString()});
+    if(status==='غائب'&&card.dataset.parentPhone)absent.push({name:card.dataset.studentName,phone:card.dataset.parentPhone});
+  }
+  await logActivity('تسجيل حضور',`${program} - ${date}`);
+  alert(`✅ تم حفظ الحضور${absent.length?'\n'+absent.length+' غائبين':''}`);
+  if(absent.length){
+    const msg=`السلام عليكم، رسالة من مركز الاندلس للتدريب\nطالبكم غائب اليوم ${date}\nللاستفسار: 01286868182`;
+    absent.forEach(a=>setTimeout(()=>window.open(`https://wa.me/2${a.phone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent(msg)}`,'_blank'),500));
+  }
+}
+
+// ─── LECTURES ───
+function renderLectures(){
+  const tbody=document.getElementById('lecturesTbody');
+  if(!allLectures.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="icon">🎓</div><p>لا يوجد محاضرات</p></div></td></tr>';return;}
+  tbody.innerHTML=allLectures.map(l=>`
+    <tr>
+      <td><b>${l.name}</b></td>
+      <td>${l.lecturer||'-'}</td>
+      <td>${l.subject_name||'-'}</td>
+      <td>${l.program||'-'}</td>
+      <td>${l.lecture_date||'-'}</td>
+      <td>
+        <button class="btn btn-primary btn-xs" onclick="openLectureAttendance('${l.id}','${l.name}','${l.program||''}')">📋 حضور</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteLecture('${l.id}')">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+function openLectureModal(){
+  ['lName','lLecturer'].forEach(f=>document.getElementById(f).value='');
+  document.getElementById('lDate').value=new Date().toISOString().split('T')[0];
+  showModal('lectureModal');
+}
+async function saveLecture(){
+  const name=document.getElementById('lName').value.trim();
+  if(!name){alert('اسم المحاضرة مطلوب');return;}
+  await sbPost('lectures',{name,lecturer:document.getElementById('lLecturer').value,
+    subject_name:document.getElementById('lSubject').value,
+    program:document.getElementById('lProgram').value,
+    lecture_date:document.getElementById('lDate').value,
+    created_at:new Date().toISOString()});
+  await logActivity('إضافة محاضرة',`إضافة: ${name}`);
+  closeModal();
+  allLectures=await sbGet('lectures','?order=lecture_date.desc')||[];
+  renderLectures();
+}
+async function deleteLecture(id){
+  if(!confirm('حذف المحاضرة؟'))return;
+  await sbDel('lectures',`?id=eq.${id}`);
+  allLectures=await sbGet('lectures','?order=lecture_date.desc')||[];
+  renderLectures();
+}
+async function openLectureAttendance(lectureId,lectureName,program){
+  showPage('lecture-att');
+  document.getElementById('lectureAttTitle').textContent=lectureName;
+  const students=program?allStudents.filter(s=>s.program===program):allStudents;
+  const existing=await sbGet('lecture_attendance',`?lecture_id=eq.${lectureId}`)||[];
+  const existingMap={};existing.forEach(a=>{existingMap[a.student_id]=a.status;});
+  document.getElementById('lectureAttGrid').innerHTML=students.map(s=>`
+    <div class="attendance-card" data-student-id="${s.id}" data-lecture-id="${lectureId}">
+      <div class="student-name">${s.name}</div>
+      <div class="att-buttons">
+        <button class="att-btn حاضر ${existingMap[s.id]==='حاضر'?'active':''}" onclick="setAtt(this)">✅ حاضر</button>
+        <button class="att-btn غائب ${(existingMap[s.id]==='غائب'||!existingMap[s.id])?'active':''}" onclick="setAtt(this)">❌ غائب</button>
+        <button class="att-btn متأخر ${existingMap[s.id]==='متأخر'?'active':''}" onclick="setAtt(this)">⏰ متأخر</button>
+      </div>
+    </div>`).join('');
+  // check 25% absence warning
+  await checkAbsenceWarnings(program);
+}
+async function saveLectureAttendance(){
+  const cards=document.querySelectorAll('#lectureAttGrid .attendance-card');
+  for(const card of cards){
+    const sid=card.dataset.studentId;
+    const lid=card.dataset.lectureId;
+    const activeBtn=card.querySelector('.att-btn.active');
+    const status=activeBtn?activeBtn.textContent.trim().replace(/[✅❌⏰]/,'').trim():'غائب';
+    await sbDel('lecture_attendance',`?lecture_id=eq.${lid}&student_id=eq.${sid}`);
+    await sbPost('lecture_attendance',{lecture_id:lid,student_id:sid,status,created_at:new Date().toISOString()});
+  }
+  await logActivity('حضور محاضرة','تسجيل حضور محاضرة');
+  alert('✅ تم حفظ الحضور');
+  showPage('lectures');
+}
+async function checkAbsenceWarnings(program){
+  if(!program)return;
+  const students=allStudents.filter(s=>s.program===program);
+  const lectures=allLectures.filter(l=>l.program===program);
+  if(!lectures.length)return;
+  for(const s of students){
+    const att=await sbGet('lecture_attendance',`?student_id=eq.${s.id}`)||[];
+    const absent=att.filter(a=>a.status==='غائب').length;
+    const pct=lectures.length>0?(absent/lectures.length)*100:0;
+    if(pct>=25){
+      console.warn(`⚠️ ${s.name} تجاوز 25% غياب (${pct.toFixed(0)}%)`);
+    }
+  }
+}
+
+// ─── PROGRAMS ───
+function renderPrograms(){
+  const c=document.getElementById('programsList');
+  if(!allPrograms.length){c.innerHTML='<div class="empty-state"><div class="icon">📚</div><p>لا يوجد برامج</p></div>';return;}
+  c.innerHTML=allPrograms.map(p=>`
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-header">
+        <div class="flex items-center gap-2">
+          <span class="badge ${p.type==='برنامج'?'badge-primary':'badge-success'}">${p.type}</span>
+          <h3>${p.name}${p.system?' - '+p.system:''}</h3>
+        </div>
+        <button class="btn btn-danger btn-sm admin-only" onclick="deleteProgram('${p.id}')">🗑️</button>
+      </div>
+      <div class="card-body">
+        <div class="flex gap-3 flex-wrap" style="font-size:.875rem">
+          ${p.duration?`<span>⏱ ${p.duration}</span>`:''}
+          ${p.fees?`<span>💰 ${Number(p.fees).toLocaleString()} ج</span>`:''}
+          ${p.deposit?`<span>💳 مقدم ${Number(p.deposit).toLocaleString()} ج</span>`:''}
+        </div>
+        ${p.notes?`<p style="margin-top:8px;color:var(--muted);font-size:.875rem">${p.notes}</p>`:''}
+      </div>
+    </div>`).join('');
+}
+function openProgramModal(){showModal('programModal');}
+async function saveProgram(){
+  const name=document.getElementById('pName').value.trim();
+  if(!name){alert('الاسم مطلوب');return;}
+  await sbPost('programs',{name,type:document.getElementById('pType').value,duration:document.getElementById('pDuration').value,
+    fees:+document.getElementById('pFees').value||null,deposit:+document.getElementById('pDeposit').value||null,
+    system:document.getElementById('pSystem').value,notes:document.getElementById('pNotes').value,created_at:new Date().toISOString()});
+  closeModal();
+  allPrograms=await sbGet('programs','?order=name.asc')||[];
+  renderPrograms();populateDropdowns();
+}
+async function deleteProgram(id){
+  if(!confirm('حذف البرنامج؟'))return;
+  await sbDel('programs',`?id=eq.${id}`);
+  allPrograms=await sbGet('programs','?order=name.asc')||[];
+  renderPrograms();populateDropdowns();
+}
+
+// ─── SUBJECTS ───
+function renderSubjects(){
+  const tbody=document.getElementById('subjectsTbody');
+  if(!allSubjects.length){tbody.innerHTML='<tr><td colspan="5"><div class="empty-state"><div class="icon">📝</div><p>لا يوجد مواد</p></div></td></tr>';return;}
+  tbody.innerHTML=allSubjects.map((s,i)=>`
+    <tr><td>${i+1}</td><td><b>${s.name}</b></td>
+    <td><span class="badge badge-primary">${s.max_grade}</span></td>
+    <td><span class="badge badge-success">${s.pass_grade}</span></td>
+    <td>
+      <button class="btn btn-warning btn-xs admin-only" onclick="editSubject('${s.id}')">✏️</button>
+      <button class="btn btn-danger btn-xs admin-only" onclick="deleteSubject('${s.id}')">🗑️</button>
+    </td></tr>`).join('');
+}
+function openSubjectModal(){
+  ['editSubjectId','subName','subMax','subPass'].forEach(f=>document.getElementById(f).value='');
+  document.getElementById('subjectModalTitle').textContent='إضافة مادة دراسية';
+  showModal('subjectModal');
+}
+function editSubject(id){
+  const s=allSubjects.find(x=>x.id==id);if(!s)return;
+  document.getElementById('editSubjectId').value=id;
+  document.getElementById('subName').value=s.name;
+  document.getElementById('subMax').value=s.max_grade;
+  document.getElementById('subPass').value=s.pass_grade;
+  document.getElementById('subjectModalTitle').textContent='تعديل مادة';
+  showModal('subjectModal');
+}
+async function saveSubject(){
+  const name=document.getElementById('subName').value.trim();
+  const max=+document.getElementById('subMax').value;
+  const pass=+document.getElementById('subPass').value||Math.round(max*.5);
+  if(!name||!max){alert('الاسم والدرجة العظمى مطلوبان');return;}
+  const editId=document.getElementById('editSubjectId').value;
+  if(editId)await sbPatch('subjects',{name,max_grade:max,pass_grade:pass},`?id=eq.${editId}`);
+  else await sbPost('subjects',{name,max_grade:max,pass_grade:pass,created_at:new Date().toISOString()});
+  closeModal();
+  allSubjects=await sbGet('subjects','?order=id.asc')||[];
+  renderSubjects();populateDropdowns();
+}
+async function deleteSubject(id){
+  if(!confirm('حذف المادة؟'))return;
+  await sbDel('subjects',`?id=eq.${id}`);
+  allSubjects=await sbGet('subjects','?order=id.asc')||[];
+  renderSubjects();
+}
+
+// ─── EXPENSES ───
+function renderExpenses(){
+  const tbody=document.getElementById('expensesTbody');
+  const total=allExpenses.reduce((a,e)=>a+(+e.amount||0),0);
+  if(document.getElementById('financeStats')){
+    document.getElementById('financeStats').innerHTML=`
+      <div class="stat-card"><div class="stat-icon" style="background:#fce4ec"><span>🧾</span></div><div class="stat-info"><h3 style="color:#e91e63">${total.toLocaleString()} ج</h3><p>إجمالي المصروفات</p></div></div>`;
+  }
+  if(!allExpenses.length){tbody.innerHTML='<tr><td colspan="5"><div class="empty-state"><div class="icon">🧾</div><p>لا يوجد مصروفات</p></div></td></tr>';return;}
+  tbody.innerHTML=allExpenses.map(e=>`
+    <tr><td>${e.expense_date}</td><td>${e.description}</td><td><span class="badge badge-secondary">${e.category||'-'}</span></td>
+    <td><b>${Number(e.amount).toLocaleString()} ج</b></td>
+    <td><button class="btn btn-danger btn-xs" onclick="deleteExpense('${e.id}')">🗑️</button></td></tr>`).join('');
+}
+function openExpenseModal(){
+  document.getElementById('expDate').value=new Date().toISOString().split('T')[0];
+  ['expAmount','expDesc'].forEach(f=>document.getElementById(f).value='');
+  showModal('expenseModal');
+}
+async function saveExpense(){
+  const amount=+document.getElementById('expAmount').value;
+  const desc=document.getElementById('expDesc').value.trim();
+  if(!amount||!desc){alert('المبلغ والبيان مطلوبان');return;}
+  await sbPost('expenses',{amount,description:desc,expense_date:document.getElementById('expDate').value,
+    category:document.getElementById('expCat').value,created_at:new Date().toISOString()});
+  await logActivity('إضافة مصروف',`${desc} - ${amount} ج`);
+  closeModal();
+  allExpenses=await sbGet('expenses','?order=expense_date.desc')||[];
+  renderExpenses();
+}
+async function deleteExpense(id){
+  if(!confirm('حذف المصروف؟'))return;
+  await sbDel('expenses',`?id=eq.${id}`);
+  allExpenses=await sbGet('expenses','?order=expense_date.desc')||[];
+  renderExpenses();
+}
+function printExpenses(){window.print();}
+
+// ─── USERS ───
+function renderUsers(){
+  const tbody=document.getElementById('usersTbody');
+  tbody.innerHTML=allUsers.map(u=>`
+    <tr>
+      <td><b>${u.full_name}</b></td>
+      <td>${u.username}</td>
+      <td><span class="badge ${u.role==='مدير'?'badge-primary':'badge-secondary'}">${u.role}</span></td>
+      <td>${u.branch||'الفرعين'}</td>
+      <td>${u.full_control?'<span class="badge badge-danger">✅ تحكم كامل</span>':'-'}</td>
+      <td>${u.last_login?new Date(u.last_login).toLocaleString('ar-EG'):'لم يدخل بعد'}</td>
+      <td>
+        <button class="btn btn-warning btn-xs" onclick="editUser('${u.id}')">✏️</button>
+        ${u.username!=='Eslam'?`<button class="btn btn-danger btn-xs" onclick="deleteUser('${u.id}')">🗑️</button>`:'🛡️'}
+      </td>
+    </tr>`).join('');
+}
+function openUserModal(){
+  ['uName','uUsername','uPassword'].forEach(f=>document.getElementById(f).value='');
+  document.getElementById('editUserId').value='';
+  document.getElementById('userModalTitle').textContent='إضافة موظف';
+  showModal('userModal');
+}
+function editUser(id){
+  const u=allUsers.find(x=>x.id==id);if(!u)return;
+  document.getElementById('editUserId').value=id;
+  document.getElementById('uName').value=u.full_name||'';
+  document.getElementById('uUsername').value=u.username||'';
+  document.getElementById('uPassword').value='';
+  document.getElementById('uRole').value=u.role||'موظف';
+  document.getElementById('uBranch').value=u.branch||'الفرعين';
+  document.getElementById('uFullControl').value=u.full_control?'true':'false';
+  document.getElementById('userModalTitle').textContent='تعديل موظف';
+  showModal('userModal');
+}
+async function saveUser(){
+  const name=document.getElementById('uName').value.trim();
+  const username=document.getElementById('uUsername').value.trim();
+  const pass=document.getElementById('uPassword').value;
+  const editId=document.getElementById('editUserId').value;
+  if(!name||!username){alert('الاسم واسم المستخدم مطلوبان');return;}
+  const data={full_name:name,username,role:document.getElementById('uRole').value,
+    branch:document.getElementById('uBranch').value,full_control:document.getElementById('uFullControl').value==='true'};
+  if(pass)data.password=pass;
+  if(editId){
+    await sbPatch('users',data,`?id=eq.${editId}`);
+    await logActivity('تعديل موظف',`تعديل: ${name}`);
+  }else{
+    if(!pass){alert('كلمة المرور مطلوبة');return;}
+    data.password=pass;data.created_at=new Date().toISOString();
+    await sbPost('users',data);
+    await logActivity('إضافة موظف',`إضافة: ${name}`);
+  }
+  closeModal();
+  allUsers=await sbGet('users','?order=created_at.asc')||[];
+  renderUsers();
+}
+async function deleteUser(id){
+  if(!confirm('حذف المستخدم؟'))return;
+  await sbDel('users',`?id=eq.${id}`);
+  allUsers=await sbGet('users','?order=created_at.asc')||[];
+  renderUsers();
+}
+
+// ─── ACTIVITY LOG ───
+async function renderActivityLog(){
+  const logs=await sbGet('activity_log','?order=created_at.desc&limit=100')||[];
+  const icons={'دخول':'🟢','خروج':'🔴','إضافة طالب':'👤','تعديل طالب':'✏️','حذف طالب':'🗑️','تسجيل حضور':'📋','إضافة إجراء':'⚠️','تسجيل درجات':'📊','رفع ملف':'📁','إضافة برنامج':'📚','إضافة موظف':'👥','تعديل موظف':'✏️','دفع قسط':'💰','إضافة مصروف':'🧾','إضافة محاضرة':'🎓','حضور محاضرة':'📋'};
+  document.getElementById('activityLog').innerHTML=logs.length?logs.map(l=>`
+    <div class="log-item">
+      <div class="log-icon" style="background:var(--light)">${icons[l.action_type]||'📌'}</div>
+      <div class="log-text"><strong>${l.user_name} — ${l.action_type}</strong>
+        <p>${l.details||''} • ${new Date(l.created_at).toLocaleString('ar-EG')}</p>
+      </div>
+    </div>`).join(''):'<div class="empty-state"><div class="icon">🕐</div><p>لا يوجد نشاط</p></div>';
+}
+
+// ─── PROFILE ───
+async function openProfile(id){
+  currentProfileId=id;
+  const s=allStudents.find(x=>x.id==id);if(!s)return;
+  showPage('profile');
+  const [grades,procedures,files,attendance,lectureAtt]=await Promise.all([
+    sbGet('grades',`?student_id=eq.${id}`)||[],
+    sbGet('procedures',`?student_id=eq.${id}&order=created_at.desc`)||[],
+    sbGet('student_files',`?student_id=eq.${id}&order=created_at.desc`)||[],
+    sbGet('attendance',`?student_id=eq.${id}&order=date.desc&limit=30`)||[],
+    sbGet('lecture_attendance',`?student_id=eq.${id}`)||[]
+  ]);
+  const gradesMap={};(grades||[]).forEach(g=>{gradesMap[g.subject_id]=g;});
+  const totalLectures=allLectures.filter(l=>l.program===s.program).length;
+  const absentLectures=(lectureAtt||[]).filter(a=>a.status==='غائب').length;
+  const absencePct=totalLectures>0?((absentLectures/totalLectures)*100).toFixed(0):0;
+
+  document.getElementById('profileContent').innerHTML=`
+    <div class="profile-header">
+      <div class="profile-photo">${s.photo_url?`<img src="${s.photo_url}" alt="${s.name}">`:'👤'}</div>
+      <div class="profile-info">
+        <h2>${s.name}</h2>
+        <p>📋 رقم القيد: ${s.enrollment_number||'-'}</p>
+        <p>📚 ${s.program||'-'} | 🏫 ${s.branch?s.branch.split('-')[0].trim():'-'}</p>
+        <p>📅 تاريخ التسجيل: ${s.enrollment_date||'-'}</p>
+        ${+absencePct>=25?`<p style="color:#ffcc00;font-weight:700">⚠️ تجاوز 25% غياب (${absencePct}%) — يستوجب قرار إعادة قيد</p>`:''}
+        <div class="flex gap-2 flex-wrap" style="margin-top:12px">
+          ${s.parent_phone?`<a href="https://wa.me/2${s.parent_phone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('السلام عليكم، رسالة من مركز الاندلس للتدريب\nبخصوص: '+s.name+'\nللتواصل: 01286868182')}" target="_blank" class="btn btn-success btn-sm">📲 واتساب ولي الأمر</a>`:''}
+          ${s.parent_phone?`<button class="btn btn-warning btn-sm" onclick="sendAbsenceMsg('${s.parent_phone}','${s.name}')">📵 إبلاغ غياب</button>`:''}
+          <button class="btn btn-info btn-sm no-print" onclick="printStudentReport('${id}')">🖨️ طباعة تقرير</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs no-print">
+      <button class="tab-btn active" onclick="switchTab(this,'tab-info')">📋 البيانات</button>
+      <button class="tab-btn" onclick="switchTab(this,'tab-grades')">📊 الدرجات</button>
+      <button class="tab-btn" onclick="switchTab(this,'tab-payments')">💰 المصروفات</button>
+      <button class="tab-btn" onclick="switchTab(this,'tab-procedures')">⚠️ الإجراءات</button>
+      <button class="tab-btn" onclick="switchTab(this,'tab-files')">📁 الملف</button>
+      <button class="tab-btn" onclick="switchTab(this,'tab-attendance')">✅ الحضور</button>
+    </div>
+
+    <!-- INFO -->
+    <div id="tab-info" class="tab-content active card">
+      <div class="card-body">
+        <div class="form-grid" style="font-size:.9rem">
+          <div><b>السن:</b> ${s.age||'-'}</div>
+          <div><b>المؤهل:</b> ${s.qualification||'-'}</div>
+          <div><b>العنوان:</b> ${s.address||'-'}</div>
+          <div><b>هاتف الطالب:</b> ${s.phone||'-'}</div>
+          <div><b>ولي الأمر:</b> ${s.parent_name||'-'}</div>
+          <div><b>هاتف ولي الأمر:</b> ${s.parent_phone?`<a href="https://wa.me/2${s.parent_phone.replace(/[^0-9]/g,'')}" target="_blank">📱 ${s.parent_phone}</a> <a href="https://wa.me/2${s.parent_phone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('السلام عليكم، رسالة من مركز الاندلس للتدريب\nبخصوص: '+s.name)}" target="_blank" class="btn btn-success btn-xs">📲 واتساب</a>`:'-'}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRADES -->
+    <div id="tab-grades" class="tab-content hidden card">
+      <div class="card-header"><h3>درجات الامتحانات</h3></div>
+      <div class="card-body">
+        ${!allSubjects.length?'<p style="color:var(--muted)">أضف المواد الدراسية أولاً</p>':`
+        <div class="table-wrap"><table class="grades-table">
+          <thead><tr><th>المادة</th><th>الدرجة العظمى</th><th>دور أول</th><th>نتيجة</th><th>دور ثاني</th><th>نتيجة</th><th>النهائية</th></tr></thead>
+          <tbody>
+            ${allSubjects.map(sub=>{
+              const g=gradesMap[sub.id]||{};
+              const r1=g.round1!==undefined?g.round1:'';
+              const r2=g.round2!==undefined?g.round2:'';
+              const pass=sub.pass_grade;
+              const r1Pass=r1!==''?(r1>=pass?'<span class="grade-pass">ناجح</span>':'<span class="grade-fail">راسب</span>'):'-';
+              const r2Pass=r2!==''?(r2>=pass?'<span class="grade-pass">ناجح</span>':'<span class="grade-fail">راسب</span>'):'-';
+              const finalG=r2!==''?r2:r1;
+              return`<tr>
+                <td><b>${sub.name}</b></td>
+                <td>${sub.max_grade}</td>
+                <td><input type="number" min="0" max="${sub.max_grade}" value="${r1}" class="grade-input" data-subject="${sub.id}" data-round="1" onchange="updateGrade(this,${sub.id},${pass},${sub.max_grade})"></td>
+                <td id="r1-${sub.id}">${r1Pass}</td>
+                <td><input type="number" min="0" max="${sub.max_grade}" value="${r2}" class="grade-input" data-subject="${sub.id}" data-round="2" onchange="updateGrade(this,${sub.id},${pass},${sub.max_grade})"></td>
+                <td id="r2-${sub.id}">${r2Pass}</td>
+                <td id="final-${sub.id}"><b>${finalG!==''?finalG:'-'}</b></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+          <tfoot><tr class="total-row"><td colspan="6"><b>المجموع والتقدير</b></td><td id="totalGrade">-</td></tr></tfoot>
+        </table></div>
+        <button class="btn btn-primary mt-3" onclick="saveGrades('${id}')">💾 حفظ الدرجات</button>
+        `}
+      </div>
+    </div>
+
+    <!-- PAYMENTS IN PROFILE -->
+    <div id="tab-payments" class="tab-content hidden" data-student-id="${id}">
+      <div style="text-align:center;padding:20px"><button class="btn btn-primary" onclick="loadProfilePayments('${id}')">📊 تحميل المصروفات</button></div>
+      <div id="profilePaymentsContent"></div>
+    </div>
+
+    <!-- PROCEDURES -->
+    <div id="tab-procedures" class="tab-content hidden card">
+      <div class="card-header">
+        <h3>سجل الإجراءات</h3>
+        <button class="btn btn-primary btn-sm no-print" onclick="openProcedureModal('${id}')">➕ إضافة</button>
+      </div>
+      <div class="card-body" id="proceduresList">
+        ${!(procedures&&procedures.length)?'<div class="empty-state"><div class="icon">✅</div><p>لا يوجد إجراءات</p></div>':
+          (procedures||[]).map(p=>`
+            <div class="procedure-item ${p.type}">
+              <div class="procedure-header">
+                <span class="badge ${getBadgeForProc(p.type)}">${p.type}</span>
+                <span class="procedure-date">📅 ${p.date||''} ${p.procedure_number?'| رقم: '+p.procedure_number:''}</span>
+              </div>
+              <p style="font-size:.875rem;margin:6px 0"><b>التفاصيل:</b> ${p.details}</p>
+              ${p.result?`<p style="font-size:.875rem;color:var(--success)"><b>النتيجة:</b> ${p.result}</p>`:''}
+              <div class="flex gap-2 mt-2">
+                <button class="btn btn-danger btn-xs no-print" onclick="deleteProcedure('${p.id}','${id}')">🗑️ حذف</button>
+                ${s.parent_phone?`<a href="https://wa.me/2${s.parent_phone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('السلام عليكم، رسالة من مركز الاندلس للتدريب\nبخصوص: '+s.name+'\nالإجراء: '+p.type+(p.procedure_number?' | رقم: '+p.procedure_number:'')+(p.date?' | التاريخ: '+p.date:'')+'\nالتفاصيل: '+p.details+(p.result?'\nالنتيجة: '+p.result:'')+'\nللتواصل: 01286868182')}" target="_blank" class="btn btn-success btn-xs no-print">📲 واتساب</a>`:''}
+              </div>
+            </div>`).join('')
+        }
+      </div>
+    </div>
+
+    <!-- FILES -->
+    <div id="tab-files" class="tab-content hidden card">
+      <div class="card-header">
+        <h3>ملفات الطالب</h3>
+        <div class="no-print">
+          <input type="file" id="fileUploadInput" multiple style="display:none" onchange="uploadStudentFiles(event,'${id}')">
+          <button class="btn btn-primary btn-sm" onclick="document.getElementById('fileUploadInput').click()">📎 رفع ملفات</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="file-grid" id="filesList">
+          ${!(files&&files.length)?'<div class="empty-state"><div class="icon">📁</div><p>لا يوجد ملفات</p></div>':
+            (files||[]).map(f=>`
+              <div class="file-item" onclick="window.open('${f.file_url}','_blank')">
+                <button class="file-del no-print" onclick="event.stopPropagation();deleteStudentFile('${f.id}','${id}','${f.file_path}')">×</button>
+                <div class="file-icon">${getFileIcon(f.file_name)}</div>
+                <div class="file-name">${f.file_name}</div>
+              </div>`).join('')
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div id="tab-attendance" class="tab-content hidden card">
+      <div class="card-header"><h3>سجل الحضور</h3><span class="${+absencePct>=25?'badge badge-danger':'badge badge-success'}">${absencePct}% غياب</span></div>
+      <div class="card-body">
+        ${!(attendance&&attendance.length)?'<div class="empty-state"><div class="icon">📋</div><p>لا يوجد سجل</p></div>':`
+        <div class="table-wrap"><table>
+          <thead><tr><th>التاريخ</th><th>البرنامج</th><th>الحالة</th></tr></thead>
+          <tbody>${(attendance||[]).map(a=>`<tr>
+            <td>${a.date}</td><td>${a.program||'-'}</td>
+            <td><span class="badge ${a.status==='حاضر'?'badge-success':a.status==='غائب'?'badge-danger':'badge-warning'}">${a.status}</span></td>
+          </tr>`).join('')}</tbody>
+        </table></div>`}
+      </div>
+    </div>
+  `;
+  calculateTotalGrades();
+}
+
+async function loadProfilePayments(studentId){
+  const payments=await sbGet('payments',`?student_id=eq.${studentId}&order=month_number.asc`)||[];
+  const today=new Date();
+  let html='<div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>البيان</th><th>المبلغ</th><th>الاستحقاق</th><th>الدفع</th><th>حالة</th><th>إجراء</th></tr></thead><tbody>';
+  for(const p of payments){
+    const due=p.due_date?new Date(p.due_date):null;
+    const daysLate=due&&!p.is_paid?Math.floor((today-due)/(1000*60*60*24)):0;
+    let rowClass=p.is_paid?'paid':daysLate>5?'overdue':daysLate>0?'pending-warn':'';
+    html+=`<tr class="${rowClass}">
+      <td><b>${p.payment_type}</b></td>
+      <td>${Number(p.amount).toLocaleString()} ج</td>
+      <td>${p.due_date||'-'}</td>
+      <td>${p.payment_date||'-'}</td>
+      <td>${p.is_paid?'<span class="badge badge-success">✅ مدفوع</span>':daysLate>5?'<span class="badge badge-danger">🔴 متأخر</span>':daysLate>0?'<span class="badge badge-warning">🟡 قارب</span>':'<span class="badge badge-secondary">⏳ لم يُدفع</span>'}</td>
+      <td>${!p.is_paid?`<button class="btn btn-success btn-xs" onclick="markPaidProfile('${p.id}','${studentId}')">✅ دفع</button>`:'<button class="btn btn-outline btn-xs" onclick="unmarkPaidProfile(\''+p.id+'\',\''+studentId+'\')">↩️</button>'}</td>
+    </tr>`;
+  }
+  html+='</tbody></table></div></div></div>';
+  document.getElementById('profilePaymentsContent').innerHTML=html;
+}
+
+async function markPaidProfile(payId,sid){
+  const today=new Date().toISOString().split('T')[0];
+  const pay=(await sbGet('payments',`?id=eq.${payId}`))||[];
+  await sbPatch('payments',{is_paid:true,payment_date:today,paid_amount:pay[0]?.amount},`?id=eq.${payId}`);
+  loadProfilePayments(sid);
+}
+async function unmarkPaidProfile(payId,sid){
+  await sbPatch('payments',{is_paid:false,payment_date:null},`?id=eq.${payId}`);
+  loadProfilePayments(sid);
+}
+
+function printStudentReport(id){
+  window.print();
+}
+
+function switchTab(btn,tabId){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>{t.classList.remove('active');t.classList.add('hidden');});
+  btn.classList.add('active');
+  const tab=document.getElementById(tabId);
+  if(tab){tab.classList.remove('hidden');tab.classList.add('active');}
+}
+
+function getBadgeForProc(type){
+  return{'تأخر مصاريف':'badge-warning','استدعاء':'badge-info','فصل':'badge-danger','إنذار':'badge-warning'}[type]||'badge-secondary';
+}
+function getFileIcon(name){
+  if(!name)return'📄';
+  const m={pdf:'📕',doc:'📘',docx:'📘',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',xls:'📗',xlsx:'📗',mp4:'🎬',mp3:'🎵'};
+  return m[name.split('.').pop().toLowerCase()]||'📄';
+}
+
+function updateGrade(input,subjectId,passGrade,maxGrade){
+  const val=+input.value;
+  const round=input.dataset.round;
+  if(round=='1'){
+    document.getElementById(`r1-${subjectId}`).innerHTML=val>=passGrade?'<span class="grade-pass">ناجح</span>':'<span class="grade-fail">راسب</span>';
+    const r2=document.querySelector(`input[data-subject="${subjectId}"][data-round="2"]`);
+    if(!r2.value)document.getElementById(`final-${subjectId}`).innerHTML=`<b>${val}</b>`;
+  }else{
+    document.getElementById(`r2-${subjectId}`).innerHTML=val>=passGrade?'<span class="grade-pass">ناجح</span>':'<span class="grade-fail">راسب</span>';
+    document.getElementById(`final-${subjectId}`).innerHTML=`<b>${val}</b>`;
+  }
+  calculateTotalGrades();
+}
+
+function calculateTotalGrades(){
+  let total=0,maxTotal=0,count=0;
+  document.querySelectorAll('[id^="final-"]').forEach(cell=>{
+    const val=parseInt(cell.querySelector('b')?.textContent);
+    const subId=cell.id.replace('final-','');
+    const sub=allSubjects.find(s=>s.id==subId);
+    if(!isNaN(val)&&sub){total+=val;maxTotal+=sub.max_grade;count++;}
+  });
+  const tc=document.getElementById('totalGrade');
+  if(!tc||!count)return;
+  const pct=maxTotal>0?(total/maxTotal)*100:0;
+  const grade=pct>=90?'امتياز':pct>=80?'جيد جداً':pct>=70?'جيد':pct>=60?'مقبول':'راسب';
+  tc.innerHTML=`<b>${total}/${maxTotal} (${pct.toFixed(1)}%) - ${grade}</b>`;
+}
+
+async function saveGrades(studentId){
+  const inputs=document.querySelectorAll('.grade-input');
+  const bySubject={};
+  inputs.forEach(inp=>{
+    const sid=inp.dataset.subject;const round=inp.dataset.round;
+    if(!bySubject[sid])bySubject[sid]={};
+    bySubject[sid][`round${round}`]=inp.value!==''?+inp.value:null;
+  });
+  for(const[subjectId,data]of Object.entries(bySubject)){
+    await sbDel('grades',`?student_id=eq.${studentId}&subject_id=eq.${subjectId}`);
+    await sbPost('grades',{student_id:studentId,subject_id:+subjectId,round1:data.round1,round2:data.round2,created_at:new Date().toISOString()});
+  }
+  await logActivity('تسجيل درجات',`درجات الطالب ID: ${studentId}`);
+  alert('✅ تم حفظ الدرجات');
+}
+
+function openProcedureModal(studentId){
+  document.getElementById('procStudentId').value=studentId;
+  document.getElementById('procDate').value=new Date().toISOString().split('T')[0];
+  ['procNum','procDetails','procResult'].forEach(f=>document.getElementById(f).value='');
+  showModal('procedureModal');
+}
+async function saveProcedure(){
+  const sid=document.getElementById('procStudentId').value;
+  const details=document.getElementById('procDetails').value.trim();
+  if(!details){alert('التفاصيل مطلوبة');return;}
+  await sbPost('procedures',{student_id:sid,type:document.getElementById('procType').value,
+    procedure_number:document.getElementById('procNum').value,date:document.getElementById('procDate').value,
+    details,result:document.getElementById('procResult').value,created_at:new Date().toISOString()});
+  await logActivity('إضافة إجراء',document.getElementById('procType').value);
+  closeModal();openProfile(sid);
+}
+async function deleteProcedure(procId,studentId){
+  if(!confirm('حذف الإجراء؟'))return;
+  await sbDel('procedures',`?id=eq.${procId}`);
+  openProfile(studentId);
+}
+
+async function uploadStudentFiles(event,studentId){
+  const files=event.target.files;if(!files.length)return;
+  for(const file of files){
+    const path=`${studentId}/${Date.now()}_${file.name}`;
+    const url=await uploadFile('student-files',path,file);
+    if(url)await sbPost('student_files',{student_id:studentId,file_name:file.name,file_url:url,file_path:path,created_at:new Date().toISOString()});
+  }
+  openProfile(studentId);
+}
+async function deleteStudentFile(fileId,studentId,filePath){
+  if(!confirm('حذف الملف؟'))return;
+  await sbDel('student_files',`?id=eq.${fileId}`);
+  openProfile(studentId);
+}
+
+function sendAbsenceMsg(phone,name){
+  const msg=`السلام عليكم، رسالة من مركز الاندلس للتدريب\nطالبكم/طالبتكم: ${name}\nغائب/ة اليوم ${new Date().toLocaleDateString('ar-EG')}\nللاستفسار: 01286868182`;
+  window.open(`https://wa.me/2${phone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+function exportStudentsExcel(){
+  const data=allStudents.map(s=>({'رقم القيد':s.enrollment_number||'','الاسم':s.name||'','السن':s.age||'','المؤهل':s.qualification||'','العنوان':s.address||'','هاتف الطالب':s.phone||'','ولي الأمر':s.parent_name||'','هاتف ولي الأمر':s.parent_phone||'','الفرع':s.branch||'','البرنامج':s.program||'','تاريخ التسجيل':s.enrollment_date||''}));
+  const ws=XLSX.utils.json_to_sheet(data);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'الطلاب');
+  XLSX.writeFile(wb,`andalus_students_${new Date().toISOString().split('T')[0]}.xlsx`);
+  logActivity('تصدير Excel','تصدير بيانات الطلاب');
+}
+
+// ─── MODALS ───
+function showModal(id){
+  document.getElementById('modalOverlay').classList.remove('hidden');
+  document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('modalOverlay'))return;
+  document.getElementById('modalOverlay').classList.add('hidden');
+  document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden'));
+}
+</script>
+</body>
+</html>
